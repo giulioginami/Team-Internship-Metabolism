@@ -22,7 +22,7 @@ rng(42); % reproducibility
 %% ========================================================================
 % Settings
 % =========================================================================
-N        = 3000;           % number of virtual individuals to attempt
+N        = 5000;           % number of virtual individuals to attempt
 time     = (0:1:480)';     % simulation time vector [min]
 meal_G   = 75000;          % 75g OGTT in mg
 
@@ -36,8 +36,8 @@ param_bounds = [
     0.0,    0.07;    % k5  [1/min]
     0.1,    3.0;     % k6  [-]
     0.5,    15.0;    % k8  [-]
-    4.0,    9.0;     % G_b [mmol/L]
-    5.0,    40.0;    % I_PL_b [uIU/mL]
+    3.9,    12.0;     % G_b [mmol/L]
+    2.0,    55.6;    % I_PL_b [mU/L]
     60.0,   130.0;   % BW  [kg]
 ];
 
@@ -48,7 +48,7 @@ n_params = size(param_bounds, 1); % = 7
 % =========================================================================
 lhs_unit = lhsdesign(N, n_params); % N x 7 matrix in [0,1]
 
-% Scale to physical ranges
+% Scale to physical ranges -> value = normalized * (max - min) + min
 lhs_scaled = lhs_unit .* (param_bounds(:,2) - param_bounds(:,1))' + param_bounds(:,1)';
 
 % Unpack columns
@@ -79,7 +79,7 @@ G_liv_b_fixed = 0.043; % basal hepatic glucose release
 n_t = length(time);
 
 glucose_clean  = NaN(N, n_t);  % noise-free glucose [mmol/L]
-insulin_clean  = NaN(N, n_t);  % noise-free insulin [uIU/mL]
+insulin_clean  = NaN(N, n_t);  % noise-free insulin [mU/L]
 glucose_noisy  = NaN(N, n_t);  % glucose + measurement noise
 insulin_noisy  = NaN(N, n_t);  % insulin + measurement noise
 param_matrix   = NaN(N, 7);    % sampled parameters for each accepted individual
@@ -167,7 +167,7 @@ for i = 1:N
     end
 
     G_sim = X(:,2); % plasma glucose [mmol/L]
-    I_sim = X(:,4); % plasma insulin [uIU/mL]
+    I_sim = X(:,4); % plasma insulin [mU/L]
 
     %% Quality control filters
     % 1) No negative values
@@ -181,20 +181,20 @@ for i = 1:N
     end
 
     % 3) Insulin must stay within physiologically plausible range
-    if max(I_sim) > 2000 || min(I_sim) < 0
+    if max(I_sim) > 200 || min(I_sim) < 0
         continue
     end
 
-    % 4) Peak glucose must occur within first 240 min (postprandial window)
-    [~, peak_idx] = max(G_sim);
-    if peak_idx > 241   % index 241 = 240 min (0-based time)
-        continue
-    end
-
-    % 5) Glucose must return towards baseline (no runaway trajectories)
-    if G_sim(end) > G_b + 5
-        continue
-    end
+%     % 4) Peak glucose must occur within first 240 min (postprandial window)
+%     [~, peak_idx] = max(G_sim);
+%     if peak_idx > 241   % index 241 = 240 min (0-based time)
+%         continue
+%     end
+% 
+%     % 5) Glucose must return towards baseline (no runaway trajectories)
+%     if G_sim(end) > G_b + 5
+%         continue
+%     end
 
     %% Add realistic measurement noise
     noise_G_pct = 0.02 + 0.01  * rand();   % uniform 2-3%
@@ -268,7 +268,7 @@ subplot(1,2,2);
 plot(t_plot, insulin_noisy(idx_plot,:)', 'Color', [0.8 0.3 0.2 0.15], 'LineWidth',0.5);
 hold on;
 plot(t_plot, median(insulin_noisy,1), 'k-', 'LineWidth', 2);
-xlabel('Time (min)'); ylabel('Insulin (uIU/mL)');
+xlabel('Time (min)'); ylabel('Insulin (mU/L)');
 title(sprintf('Plasma Insulin  (n=%d shown)', n_plot));
 xlim([0 480]); grid on;
 

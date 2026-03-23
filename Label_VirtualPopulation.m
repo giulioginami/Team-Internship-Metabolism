@@ -50,7 +50,7 @@ G_2h      = glucose_noisy(:, idx_2h);     % [n_valid x 1]
 %is_T2DM = (G_fasting >= 7.0) | (G_2h >= 11.1);
 is_T2DM = (G_fasting >= 7.0) & (G_2h >= 11.1);
 %is_IGT  = ~is_T2DM & ((G_fasting >= 5.6 & G_fasting <= 6.9) | ...
- %                      (G_2h      >= 7.8 & G_2h      <= 11.1));
+%                       (G_2h      >= 7.8 & G_2h      <= 11.1));
 is_IGT = ~is_T2DM & (G_2h >= 7.8 & G_2h <= 11.1);
 is_NGT  = (G_fasting < 5.6 & G_2h < 7.8);   % i.e. fasting < 5.6 AND 2-h < 7.8
 
@@ -141,7 +141,7 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
         else
             traces  = ds.insulin_noisy;
             med_val = median(ds.insulin_noisy, 1);
-            ylab    = 'Insulin (uIU/mL)';
+            ylab    = 'Insulin (mU/L)';
         end
 
         plot(t_plot, traces(idx,:)', 'Color', [clr 0.12], 'LineWidth', 0.5);

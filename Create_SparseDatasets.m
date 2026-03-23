@@ -108,7 +108,7 @@ for col = 1:2
             ylab = 'Glucose (mmol/L)';
         else
             vals = ds.insulin_noisy;
-            ylab = 'Insulin (uIU/mL)';
+            ylab = 'Insulin (mU/L)';
         end
 
         % Individual sparse traces (markers only)
