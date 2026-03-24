@@ -22,7 +22,7 @@ rng(42); % reproducibility
 %% ========================================================================
 % Settings
 % =========================================================================
-N        = 5000;           % number of virtual individuals to attempt
+N        = 1000;           % number of virtual individuals to attempt
 time     = (0:1:480)';     % simulation time vector [min]
 meal_G   = 75000;          % 75g OGTT in mg
 
@@ -32,10 +32,10 @@ meal_G   = 75000;          % 75g OGTT in mg
 % Order:   k1, k5, k6, k8, G_b, I_PL_b, BW
 % =========================================================================
 param_bounds = [
-    0.005,  0.04;    % k1  [1/min]
-    0.0,    0.07;    % k5  [1/min]
-    0.1,    3.0;     % k6  [-]
-    0.5,    15.0;    % k8  [-]
+    0.0,    0.02;    % k1  [1/min]
+    0.0,    0.08;    % k5  [1/min]
+    0.0,    2.56;     % k6  [-]
+    0.0,    47.42;    % k8  [-]
     3.9,    12.0;     % G_b [mmol/L]
     2.0,    55.6;    % I_PL_b [mU/L]
     60.0,   130.0;   % BW  [kg]
