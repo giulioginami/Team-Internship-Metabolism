@@ -53,7 +53,7 @@ for k = 1:n_cats
 end
 
 %% ========================================================================
-% Figure 1 ??? Postprandial Glucose
+% Figure 1 : Postprandial Glucose
 % =========================================================================
 fig1 = figure('Name','Glucose Responses by ADA Category', ...
               'Position',[60 400 900 520]);
@@ -91,7 +91,7 @@ yline(11.1, ':', 'Color',[0.5 0.5 0.5], 'LineWidth',1, 'Label','11.1');
 
 xlabel('Time (min)', 'FontSize',12);
 ylabel('Plasma Glucose (mmol/L)', 'FontSize',12);
-title('Postprandial Glucose ??? Median & Mean by ADA Category', 'FontSize',13);
+title('Postprandial Glucose : Median & Mean by ADA Category', 'FontSize',13);
 xlim([0 480]); grid on; box on;
 
 legend_labels = {};
@@ -102,7 +102,7 @@ end
 legend(h_leg, legend_labels, 'Location','northeast', 'FontSize',9);
 
 %% ========================================================================
-% Figure 2 ??? Postprandial Insulin
+% Figure 2 : Postprandial Insulin
 % =========================================================================
 fig2 = figure('Name','Insulin Responses by ADA Category', ...
               'Position',[60 60 900 520]);
@@ -131,7 +131,7 @@ end
 
 xlabel('Time (min)', 'FontSize',12);
 ylabel('Plasma Insulin (mU/L)', 'FontSize',12);
-title('Postprandial Insulin ??? Median & Mean by ADA Category', 'FontSize',13);
+title('Postprandial Insulin : Median & Mean by ADA Category', 'FontSize',13);
 xlim([0 480]); grid on; box on;
 
 legend_labels2 = {};
@@ -142,7 +142,7 @@ end
 legend(h_leg2, legend_labels2, 'Location','northeast', 'FontSize',9);
 
 %% ========================================================================
-% Figure 3 ??? Box plots of varied parameters per category
+% Figure 3 : Box plots of varied parameters per category
 % =========================================================================
 param_names  = dataset_NGT.param_names;   % {'k1','k5','k6','k8','G_b','I_PL_b','BW'}
 param_labels = {'k_1  (1/min)', 'k_5  (1/min)', 'k_6  (-)', ...
@@ -226,6 +226,6 @@ end
 legend('Location','best', 'FontSize',12);
 title('Category legend', 'FontSize',11);
 
-sgtitle('Parameter Distributions ??? NGT vs IGT vs T2DM', 'FontSize',14);
+sgtitle('Parameter Distributions : NGT vs IGT vs T2DM', 'FontSize',14);
 
 fprintf('\nDone. Three figures generated.\n');

@@ -3,7 +3,7 @@
 % large heterogeneous virtual population using the EDES model.
 %
 % Key varied parameters (most sensitive, from sensitivity analysis):
-%   k1  - gastric emptying rate
+%   k1  - rate constant of glucose appearance in the gut
 %   k5  - delayed insulin-dependent glucose uptake
 %   k6  - proportional beta-cell response (P-gain)
 %   k8  - derivative beta-cell response (D-gain)
@@ -22,7 +22,7 @@ rng(42); % reproducibility
 %% ========================================================================
 % Settings
 % =========================================================================
-N        = 1000;           % number of virtual individuals to attempt
+N        = 5000;           % number of virtual individuals to attempt
 time     = (0:1:480)';     % simulation time vector [min]
 meal_G   = 75000;          % 75g OGTT in mg
 
@@ -32,10 +32,10 @@ meal_G   = 75000;          % 75g OGTT in mg
 % Order:   k1, k5, k6, k8, G_b, I_PL_b, BW
 % =========================================================================
 param_bounds = [
-    0.0,    0.02;    % k1  [1/min]
-    0.0,    0.08;    % k5  [1/min]
-    0.0,    2.56;     % k6  [-]
-    0.0,    47.42;    % k8  [-]
+    0.02,    0.03;    % k1  [1/min]
+    0.0,    0.17;    % k5  [1/min]
+    0.0,    0.34;     % k6  [-]
+    0.0,    10.0;    % k8  [-]
     3.9,    12.0;     % G_b [mmol/L]
     2.0,    55.6;    % I_PL_b [mU/L]
     60.0,   130.0;   % BW  [kg]
@@ -63,7 +63,7 @@ BW_vec     = lhs_scaled(:,7);
 %% ========================================================================
 % Fixed parameters (Rozendaal et al. 2018)
 % =========================================================================
-k2     = 0.28;       % glucose appearance from gut [1/min]
+k2     = 0.28;       % rate constant of gut emptying [1/min]
 k3     = 6.07e-3;    % hepatic glucose release suppression by G [1/min]
 k4     = 2.35e-4;    % hepatic glucose release suppression by delayed I [1/min]
 k7     = 1.15;       % integral beta-cell gain [1/min]
@@ -181,7 +181,7 @@ for i = 1:N
     end
 
     % 3) Insulin must stay within physiologically plausible range
-    if max(I_sim) > 200 || min(I_sim) < 0
+    if max(I_sim) > 400 || min(I_sim) < 0
         continue
     end
 

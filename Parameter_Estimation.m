@@ -1,6 +1,6 @@
 data = load('virtual_population_sparse.mat');
 
-med = median(data.dataset_NGT_sparse.param_matrix, 1); % median params of population
+med = median(data.dataset_T2DM_sparse.param_matrix, 1); % median params of population
 
 % ==========================================
 % 1. DATA PREPARATION & INITIALIZATION
@@ -9,8 +9,8 @@ t_data = [0, 30, 60, 90, 120, 150, 180, 210, 240, 360, 480]';
 num_timepoints = length(t_data);
 % Upload data
 
-G_data_matrix = [data.dataset_NGT_sparse.glucose_noisy];
-I_data_matrix = [data.dataset_NGT_sparse.insulin_noisy]; 
+G_data_matrix = [data.dataset_T2DM_sparse.glucose_noisy];
+I_data_matrix = [data.dataset_T2DM_sparse.insulin_noisy]; 
 num_patients  = size(G_data_matrix, 1);                   
 
 % Global Known Parameters
@@ -26,7 +26,7 @@ k_optimized_all = zeros(num_patients, 2);
 
 % Optimization setup
 lb = [0, 0]; 
-ub = [2.56, 50.0];
+ub = [0.34, 10.0];
 % Turning off the iterative display so it doesn't flood your command window for 200 loops
 options = optimoptions('lsqnonlin', 'Display', 'off', 'StepTolerance', 1e-6);
 
@@ -37,7 +37,7 @@ disp('Starting individual optimizations for patients...');
 
 for i = 1:num_patients
     % Extract individual patient data (column vectors)
-    k_initial = data.dataset_NGT_sparse.param_matrix(i, [3, 4]);  % [k6, k8] for patient i or median?
+    k_initial = data.dataset_T2DM_sparse.param_matrix(i, [3, 4]);  % [k6, k8] for patient i or median?
     G_pat = G_data_matrix(i, :);
     I_pat = I_data_matrix(i, :);
     
@@ -99,22 +99,34 @@ title('k8 distribution'); legend('show');
 % ==========================================
 
 function residuals = compute_residuals(k, t_data, G_data, dG_data, IntG_data, I_data, p)
-    [~, I_sim] = ode45(@(t, I) metabolism_ode(t, I, k, t_data, G_data, dG_data, IntG_data, p), ...
-                       t_data, I_data(1));
-    residuals = I_sim(:) - I_data(:);  
+    n     = length(t_data);
+    I_sim = zeros(n, 1);
+    I_sim(1) = I_data(1);   % start from fasting insulin
+
+    for j = 1:n-1
+        dt = t_data(j+1) - t_data(j);
+
+        % dI/dt at current point j using known values (no interpolation)
+        dIdt_j   = compute_dIdt(I_sim(j), G_data(j),   dG_data(j),   IntG_data(j),   k, p);
+
+        % Euler predictor
+        I_pred   = I_sim(j) + dt * dIdt_j;
+
+        % dI/dt at next point j+1 using predicted I and known G values
+        dIdt_jp1 = compute_dIdt(I_pred,   G_data(j+1), dG_data(j+1), IntG_data(j+1), k, p);
+
+        % Trapezoidal corrector
+        I_sim(j+1) = I_sim(j) + (dt/2) * (dIdt_j + dIdt_jp1);
+    end
+
+    residuals = I_sim - I_data(:);
 end
 
-function dIdt = metabolism_ode(t, I, k, t_data, G_data, dG_data, IntG_data, p)
-    k6 = k(1); k8 = k(2);
-    
-    Gt    = interp1(t_data, G_data, t, 'linear', 'extrap');
-    dGt   = interp1(t_data, dG_data, t, 'linear', 'extrap');
-    IntGt = interp1(t_data, IntG_data, t, 'linear', 'extrap');
-    
-    c3 = p.k7 * p.Gb / (p.beta * p.tau_i * p.Ib);      % 
-    i_pnc = (1 / p.beta) * ( k6*(Gt - p.Gb) + (p.k7/p.tau_i)*IntGt + (p.k7/p.tau_i)*p.Gb + (k8*p.tau_d)*dGt );  
+function dIdt = compute_dIdt(I, G, dG, IntG, k, p)
+    k6    = k(1); k8 = k(2);
+    c3    = p.k7 * p.Gb / (p.beta * p.tau_i * p.Ib);
+    i_pnc = (1/p.beta) * (k6*(G - p.Gb) + (p.k7/p.tau_i)*IntG + (p.k7/p.tau_i)*p.Gb + k8*p.tau_d*dG);
     i_liv = c3 * I;
     i_if  = p.k9 * (I - p.Ib);
-    
-    dIdt = i_pnc - i_liv - i_if;
+    dIdt  = i_pnc - i_liv - i_if;
 end

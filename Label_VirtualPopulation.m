@@ -47,8 +47,8 @@ G_2h      = glucose_noisy(:, idx_2h);     % [n_valid x 1]
 % Apply ADA rules
 % Precedence: T2DM > IGT > NGT  (T2DM checked first)
 % =========================================================================
-%is_T2DM = (G_fasting >= 7.0) | (G_2h >= 11.1);
-is_T2DM = (G_fasting >= 7.0) & (G_2h >= 11.1);
+is_T2DM = (G_fasting >= 7.0) | (G_2h >= 11.1);
+%is_T2DM = (G_fasting >= 7.0) & (G_2h >= 11.1);
 %is_IGT  = ~is_T2DM & ((G_fasting >= 5.6 & G_fasting <= 6.9) | ...
 %                       (G_2h      >= 7.8 & G_2h      <= 11.1));
 is_IGT = ~is_T2DM & (G_2h >= 7.8 & G_2h <= 11.1);
@@ -153,4 +153,4 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
     end
 end
 
-sgtitle(sprintf('EDES Virtual Population ??? ADA Categories  |  N_{total} = %d', n_valid));
+sgtitle(sprintf('EDES Virtual Population : ADA Categories  |  N_{total} = %d', n_valid));
