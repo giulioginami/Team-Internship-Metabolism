@@ -22,7 +22,7 @@ rng(42); % reproducibility
 %% ========================================================================
 % Settings
 % =========================================================================
-N        = 5000;           % number of virtual individuals to attempt
+N        = 100;           % number of virtual individuals to attempt
 time     = (0:1:480)';     % simulation time vector [min]
 meal_G   = 75000;          % 75g OGTT in mg
 
@@ -37,7 +37,7 @@ param_bounds = [
     0.0,    0.34;     % k6  [-]
     0.0,    10.0;    % k8  [-]
     3.9,    12.0;     % G_b [mmol/L]
-    2.0,    55.6;    % I_PL_b [mU/L]
+    2.0,    80.0;    % I_PL_b [mU/L]
     60.0,   130.0;   % BW  [kg]
 ];
 
@@ -176,12 +176,19 @@ for i = 1:N
     end
 
     % 2) Glucose must stay within physiologically plausible range
-    if max(G_sim) > 30 || min(G_sim) < 2
+    if max(G_sim) > 30 || min(G_sim) < 1
         continue
     end
 
     % 3) Insulin must stay within physiologically plausible range
     if max(I_sim) > 400 || min(I_sim) < 0
+        continue
+    end
+
+    % 4) Reject oscillating responses (too many direction changes)
+    n_crossings_G = sum(diff(sign(diff(G_sim))) ~= 0);
+    n_crossings_I = sum(diff(sign(diff(I_sim))) ~= 0);
+    if n_crossings_G > 3 || n_crossings_I > 3
         continue
     end
 
@@ -197,8 +204,8 @@ for i = 1:N
 %     end
 
     %% Add realistic measurement noise
-    noise_G_pct = 0.02 + 0.01  * rand();   % uniform 2-3%
-    noise_I_pct = 0.05 + 0.03  * rand();   % uniform 5-8%
+    noise_G_pct = 0.05;   % fixed 5%
+    noise_I_pct = 0.10;   % fixed 10%
 
     G_noisy = G_sim .* (1 + noise_G_pct * randn(n_t, 1));
     I_noisy = I_sim .* (1 + noise_I_pct * randn(n_t, 1));
