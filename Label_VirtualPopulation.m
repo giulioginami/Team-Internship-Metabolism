@@ -33,26 +33,17 @@ n_valid       = virtual_population.n_valid;
 % =========================================================================
 % Fasting = first time point (t = 0 min)
 idx_fast = find(time == 0, 1);
-% 2-hour post-load = t = 120 min
-idx_2h   = find(time == 120, 1);
-
-if isempty(idx_fast) || isempty(idx_2h)
-    error('Could not locate t=0 or t=120 in the time vector.');
-end
-
+idx_30 = find(time == 30, 1);
+idx_60 = find(time == 60, 1);
+idx_90 = find(time == 90, 1);
+idx_120 = find(time == 120, 1);
+ogtt_test_glucose = glucose_clean(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
+ogtt_test_insulin = insulin_clean(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
 G_fasting = glucose_noisy(:, idx_fast);   % [n_valid x 1]
-G_2h      = glucose_noisy(:, idx_2h);     % [n_valid x 1]
-
-%% ========================================================================
+G_2h      = glucose_noisy(:, idx_120);    % [n_valid x 1]
 % Apply ADA rules
-% Precedence: T2DM > IGT > NGT  (T2DM checked first)
-% =========================================================================
-is_T2DM = (G_fasting >= 7.0) | (G_2h >= 11.1);
-%is_T2DM = (G_fasting >= 7.0) & (G_2h >= 11.1);
-%is_IGT  = ~is_T2DM & ((G_fasting >= 5.6 & G_fasting <= 6.9) | ...
-%                       (G_2h      >= 7.8 & G_2h      <= 11.1));
-is_IGT = ~is_T2DM & (G_2h >= 7.8 & G_2h <= 11.1);
-is_NGT  = (G_fasting < 5.6 & G_2h < 7.8);   % i.e. fasting < 5.6 AND 2-h < 7.8
+[is_NGT, is_IGT, is_T2DM, err] = Classify_Diabetes_2H_OGTT(ogtt_test_glucose, ogtt_test_insulin);
+
 
 labels = repmat({'NGT'}, n_valid, 1);
 labels(is_IGT)  = {'IGT'};
@@ -125,7 +116,7 @@ datasets   = {dataset_NGT, dataset_IGT, dataset_T2DM};
 
 for col = 1:2   % col 1 = glucose, col 2 = insulin
     for r = 1:3
-        subplot(2, 3, (col-1)*3 + r);
+        ax = subplot(2, 3, (col-1)*3 + r);
         ds  = datasets{r};
         cat = categories{r};
         clr = colors.(cat);
@@ -133,24 +124,42 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
         n_avail = ds.n;
         n_draw  = min(n_show, n_avail);
         idx     = randperm(n_avail, n_draw);
-
         if col == 1
             traces  = ds.glucose_noisy;
             med_val = median(ds.glucose_noisy, 1);
+            q1 = prctile(ds.glucose_noisy, 25, 1);
+            q3 = prctile(ds.glucose_noisy, 75, 1);
             ylab    = 'Glucose (mmol/L)';
+            ylimits = [0 20];
         else
             traces  = ds.insulin_noisy;
             med_val = median(ds.insulin_noisy, 1);
-            ylab    = 'Insulin (mU/L)';
+            q1 = prctile(ds.insulin_noisy, 25, 1);
+            q3 = prctile(ds.insulin_noisy, 75, 1);
+            ylimts = [0 250];
         end
-
-        plot(t_plot, traces(idx,:)', 'Color', [clr 0.12], 'LineWidth', 0.5);
-        hold on;
-        plot(t_plot, med_val, 'Color', clr*0.6, 'LineWidth', 2);
+        
+        % plot sampled traces
+        plot(ax, t_plot, traces(idx,:)', 'Color', [clr 0.12], 'LineWidth', 0.5);
         xlabel('Time (min)'); ylabel(ylab);
-        title(sprintf('%s  (n=%d)', cat, n_avail));
-        xlim([0 480]); grid on;
+        hold(ax, 'on');
+        
+        % plot IQR as shaded band
+        fill_x = [t_plot, fliplr(t_plot)];
+        fill_y = [q1, fliplr(q3)];
+        h = fill(fill_x, fill_y, clr*0.8, 'EdgeColor', 'none');
+        set(h, 'FaceAlpha', 0.6);
+        % plot median on top
+        plot(ax, t_plot, med_val, 'Color', clr*0.6, 'LineWidth', 2);
+        
+        xlabel(ax, 'Time (min)'); ylabel(ylab);
+        title(ax, sprintf('%s  (n=%d)', cat, n_avail));
+        xlim(ax, [0 480]);%xlim(ax, [0 180]); 
+        %ylim(ax, ylimits);
+        grid(ax,'on');
+        hold(ax, 'off');
+
     end
 end
 
-sgtitle(sprintf('EDES Virtual Population : ADA Categories  |  N_{total} = %d', n_valid));
+sgtitle(sprintf('ADA classification | N_{total} = %d', n_valid));
