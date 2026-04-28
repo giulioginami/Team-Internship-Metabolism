@@ -39,6 +39,14 @@ using Random
 using Statistics
 using Printf
 using JLD2
+# Attempt to load Plots; if unavailable, continue without plotting
+try
+    using Plots
+    const HAS_PLOTS = true
+catch e
+    @warn "Plots package not found; plotting will be disabled. Run `import Pkg; Pkg.add(\"Plots\")` to enable."
+    const HAS_PLOTS = false
+end
 
 # ============================================================================
 # SECTION 1 — SETTINGS
@@ -379,6 +387,49 @@ end
 
 # ============================================================================
 # SECTION 10 — ENTRY POINT
+
+"""Plot the virtual population trajectories with labels.
+
+Generates a PNG image showing glucose and insulin time‑courses for a subset of individuals,
+colored by ADA label (NGT, IGT, T2DM).
+"""
+function plot_virtual_population(vp; max_per_label=30, output_path="population_plot.png")
+    HAS_PLOTS || return nothing  # Skip if Plots not available
+    # Prepare colors for the three labels
+    label_colors = Dict(1 => :green, 2 => :orange, 3 => :red)  # 1=NGT,2=IGT,3=T2DM
+    # Determine indices for each label
+    label_indices = Dict(
+        1 => findall(==(1), vp.labels_int),
+        2 => findall(==(2), vp.labels_int),
+        3 => findall(==(3), vp.labels_int)
+    )
+    # Limit number of trajectories plotted per label
+    for (lbl, idxs) in label_indices
+        if length(idxs) > max_per_label
+            label_indices[lbl] = rand(idxs, max_per_label)
+        end
+    end
+    # Plot glucose
+    p1 = plot(vp.time, zeros(length(vp.time)), legend=:topright, title="Glucose (noisy) by label", xlabel="Time (min)", ylabel="Glucose (mmol/L)")
+    for (lbl, idxs) in label_indices
+        for i in idxs
+            plot!(p1, vp.time, vp.glucose_noisy[i, :], color=label_colors[lbl], label=lbl==first(idxs) ? (lbl==1 ? "NGT" : lbl==2 ? "IGT" : "T2DM") : "")
+        end
+    end
+    # Plot insulin
+    p2 = plot(vp.time, zeros(length(vp.time)), legend=:topright, title="Insulin (noisy) by label", xlabel="Time (min)", ylabel="Insulin (mU/L)")
+    for (lbl, idxs) in label_indices
+        for i in idxs
+            plot!(p2, vp.time, vp.insulin_noisy[i, :], color=label_colors[lbl], label=lbl==first(idxs) ? (lbl==1 ? "NGT" : lbl==2 ? "IGT" : "T2DM") : "")
+        end
+    end
+    # Combine and save
+    plt = plot(p1, p2, layout=(2,1), size=(800,800))
+    savefig(plt, output_path)
+    @info "Saved population plot to $output_path"
+    return plt
+end
+
 # ============================================================================
 
 function main()
@@ -396,6 +447,8 @@ function main()
     save_gating_data(gating_dir, vp.features, vp.labels_int)
 
     println("\nPipeline complete.")
+    # Plot population and save image
+    HAS_PLOTS && plot_virtual_population(vp)  # Plot only if Plots installed
     println("  JLD2 : $outfile")
     println("  CSV  : $gating_dir/features.csv, labels.csv")
     println("\nNext: run gating_network/gating_network.jl to train the classifier")

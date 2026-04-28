@@ -1,0 +1,42 @@
+
+--- 1-s2.0-S0005109824005594-main.pdf ---
+Automatica 173 (2025) 112066 Contents lists available at ScienceDirect Automatica journal homepage: www.elsevier.com/locate/automatica Explainable data-driven modeling via mixture of experts: Towards effective blending of gray and black-box models✩ Jessica Leoni a,∗, Valentina Breschi b, Simone Formentin a, Mara Tanelli a a Dipartimento di Elettronica, Bioingegneria e Informazione, Politecnico di Milano, Via Ponzio 34/5, Milano, Italy b Department of Electrical Engineering, Eindhoven University of Technology, 5600 MB Eindhoven, The Netherlands a r t i c l e i n f o Article history: Received 1 
+
+--- 1-s2.0-S0025556415000188-mainext.pdf ---
+Mathematical Biosciences 262 (2015) 167–181 Contents lists available at ScienceDirect Mathematical Biosciences journal homepage: www.elsevier.com/locate/mbs Mathematical modelling of hepatic lipid metabolism Adrian C. Pratta,b, Jonathan A.D. Wattisb,∗, Andrew M. Saltera a Division of Nutritional Sciences, School of Biosciences, University of Nottingham, Sutton Bonington Campus, Loughborough, Leicestershire LE12 5 RD, UK b Centre for Mathematical Medicine and Biology, School of Mathematical Sciences, University of Nottingham, University Park, Nottingham NG7 2RD, UK article info Article history:
+
+--- 1-s2.0-S0169409X0300190X-main.pdf ---
+Closed-loop insulin delivery—the path to physiological glucose control G.M. Steil, A.E. Panteleon, K. Rebrin * Medtronic MiniMed Department, Sensor R&D, 18000 Devonshire St., Northridge, CA 91325-1219, USA Received 26 May 2003; accepted 6 August 2003 Abstract The development of an artificial pancreas for the treatment of insulin-dependent diabetes is a highly desired endeavor for patients, physicians, scientists, and engineers. Historical algorithms and recent progress in research and technology are reviewed in the present article, together with aspects of h-cell physiology that lead to normal
+
+--- 10.1177_1932296814562607.pdf ---
+Journal of Diabetes Science and Technology 2015, Vol. 9(2) 282 –292 © 2014 Diabetes Technology Society Reprints and permissions:  sagepub.com/journalsPermissions.nav DOI: 10.1177/1932296814562607 dst.sagepub.com Original Article Diabetes is a serious and life-threatening condition that reduces  the quality of life of the patient and is also costly, both in medi- cal costs and in lost work-hours. 1 The incidence and severity of  the complications of diabetes can considerably be reduced if  patients develop a lifestyle that leads to good glycemic con- trol. 2,3 Research has shown that diabetes e
+
+--- ijms-15-06184.pdf ---
+  Int. J. Mol. Sci.  2014, 15, 6184-6223; doi:10.3390/ijms15046184    International Journal of   Molecular Sciences  ISSN 1422-0067  www.mdpi.com/journal/ijms  Review  Obesity and Its Metabolic Complications:   The Role of Adipokines and the Relationship between Obesity,  Inflammation, Insulin Resistance, Dyslipidemia and  Nonalcoholic Fatty Liver Disease  Un Ju Jung and Myung-Sook Choi *  Center for Food and Nutritional Genomics Research, Kyungpook National University,   1370 Sankyuk Dong Puk-ku, Daegu 702-701, Korea; E-Mail: jungunju@naver.com  * Author to whom correspondence should be addre
+
+--- Mixture_of_Specialized_Experts_for_Model-Heterogeneous_Personalized_Federated_Learning.pdf ---
+224 IEEE NETWORKING LETTERS, VOL. 7, NO. 3, SEPTEMBER 2025 Mixture of Specialized Experts for Model-Heterogeneous Personalized Federated Learning Tonghui Liang , Student Member, IEEE,M e n gH u ,Student Member, IEEE, and Enchang Sun , Senior Member, IEEE Abstract—Federated learning is a distributed machine learning paradigm designed to facilitate collaborative model training while preserving user data privacy. However, in practical scenarios, data and model heterogeneity have emerged as signiﬁcant barri- ers to its widespread application. Existing model heterogeneous personalized federated lea
+
+--- PIIS2405471218301480.pdf ---
+Article A Hierarchical, Data-Driven Approach to Modeling Single-Cell Populations Predicts Latent Causes of Cell-To-Cell Variability Graphical Abstract Highlights d Mechanistic model for populations consisting of multiple heterogeneous subpopulations d Scalable parameter estimation and model selection using multivariate single-cell data d Study of sensitization signaling in primary sensory neurons d Proof of principle for ﬁtting of mechanistic model with single- cell data Authors Carolin Loos, Katharina Moeller, Fabian Fro¨ hlich, Tim Hucho, Jan Hasenauer Correspondence jan.hasenauer@helmholtz-
+
+--- Pitch.pdf ---
+From black box to  grey box modelling: Hybrid modelling approaches for  personalised medicine.  Shauna O’Donovan       s.d.odonovan@tue.nl 
+
+--- Project_Plan_T3_Metabolism.pdf ---
+Project Plan: Mixture of Experts Framework for Personalised Characterization of the Insulin Synthesis System Gabriele Salvo Giulio Ginami Sem van der Worp Rens Scheepers March 2, 2026 Contents 1 Introduction 2 2 Problem Statement 2 3 Requirements 2 4 Project Objectives and Deliverables 3 4.1 Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3 4.2 Deliverables . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3 5 Methodology 3 5.1 Collective Work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3 5.2 I
+
+--- s11306-014-0673-7.pdf ---
+REVIEW ARTICLE Analyzing metabolomics-based challenge tests Daniel J. Vis • Johan A. Westerhuis • Doris M. Jacobs • John P. M. van Duynhoven • Suzan Wopereis • Ben van Ommen • Margriet M. W. B. Hendriks • Age K. Smilde Received: 1 October 2013 / Accepted: 5 May 2014 / Published online: 4 June 2014 /C211Springer Science+Business Media New York 2014 Abstract Challenge tests are used to assess the resilience of human beings to perturbations by analyzing responses to detect functional abnormalities. Well known examples are allergy tests and glucose tolerance tests. Increasingly, metabolomics analy
+
+--- s12263-015-0459-1.pdf ---
+RESEARCH PAPER Phenotypic ﬂexibility as a measure of health: the optimal nutritional stress response test Johanna H. M. Stroeve 1 • Herman van Wietmarschen 1 • Bas H. A. Kremer 1 • Ben van Ommen 1 • Suzan Wopereis 1 Received: 12 November 2014 / Accepted: 21 March 2015 / Published online: 21 April 2015 /C211The Author(s) 2015. This article is published with open access at Springerlink.com Abstract Nutrition research is struggling to demonstrate beneﬁcial health effects, since nutritional effects are often subtle and long term. Health has been redeﬁned as the ability of our body to cope with dai
+
+--- s41392-022-01073-0.pdf ---
+REVIEW ARTICLE OPEN Trends in insulin resistance: insights into mechanisms and therapeutic strategy Mengwei Li 1,2, Xiaowei Chi 3, Ying Wang 1,2, Sarra Setrerrahmane 4, Wenwei Xie 1,2 and Hanmei Xu 1,2 ✉ The centenary of insulin discovery represents an important opportunity to transform diabetes from a fatal diagnosis into a medically manageable chronic condition. Insulin is a key peptide hormone and mediates the systemic glucose metabolism in different tissues. Insulin resistance (IR) is a disordered biological response for insulin stimulation through the disruption of different molecular pat
+
+--- s41467-025-62415-4.pdf ---
+Article https://doi.org/10.1038/s41467-025-62415-4 Increasing certainty in systems biology models using Bayesian multimodel inference Nathaniel Linden-Santangeli 1, Jin Zhang2,B o r i sK r a m e r1 & Padmini Rangamani 1,2 Mathematical models are indispensable for studying the architecture and behavior of intracellular signaling networks. It is common to develop models using phenomenological approximations due to the difﬁculty of fully obser- ving the intermediate steps in intracellular signaling pathways. Thus, multiple models can be built to represent the same pathway. This opens up challenge
+
+--- s41540-025-00570-6.pdf ---
+npj | systems biology and applications Article Published in partnership with the Systems Biology Institute https://doi.org/10.1038/s41540-025-00570-6 Conditional universal differential equations capture population dynamics and interindividual variation in c-peptide production Check for updates Max de Rooij1,2 , Natal A. W. van Riel1,2 &S h a u n aD .O’Donovan1,2 Universal differential equations (UDEs) are an emerging approach in biomedical systems biology, integrating physiology-driven mathematical models with machine learning for data-driven model discovery in areas where knowledge of the und

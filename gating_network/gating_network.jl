@@ -192,7 +192,7 @@ function train_gating(data_dir::String;
     )
 
     best_test_loss = Inf
-    patience       = 100       # early-stopping patience (epochs)
+    patience       = 1000000       # early-stopping patience (epochs)
     wait           = 0
     best_model     = deepcopy(model)
 
