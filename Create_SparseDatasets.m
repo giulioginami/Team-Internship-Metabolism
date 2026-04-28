@@ -92,7 +92,7 @@ ds_list      = {dataset_NGT_sparse, dataset_IGT_sparse, dataset_T2DM_sparse};
 clr_map      = {[0.18 0.63 0.18], [0.93 0.69 0.13], [0.80 0.15 0.15]};
 n_show       = 80;
 
-figure('Name','Sparse datasets ??? verification', 'Position',[80 80 1300 540]);
+figure('Name','Sparse datasets : verification', 'Position',[80 80 1300 540]);
 
 for col = 1:2
     for r = 1:3
@@ -122,7 +122,7 @@ for col = 1:2
              'MarkerFaceColor', c*0.55, 'DisplayName', 'Median');
 
         xlabel('Time (min)'); ylabel(ylab);
-        title(sprintf('%s ??? %s  (n=%d)', categories{r}, ylab, ds.n));
+        title(sprintf('%s : %s  (n=%d)', categories{r}, ylab, ds.n));
         set(gca, 'XTick', t_sparse);
         xlim([-20, 500]); grid on; box on;
     end
