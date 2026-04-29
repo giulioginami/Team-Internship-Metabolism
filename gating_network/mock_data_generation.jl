@@ -126,6 +126,40 @@ const FEATURE_NAMES = [
     "homa_ir"
 ]
 
+# Real-world OGTT sampling schedule, matched to juliacon-2024/predict/*.csv
+# so the model trains and evaluates on the same time grid.
+const GLUCOSE_TIMES = (0, 15, 30, 60, 120, 180, 240)
+const INSULIN_TIMES = (0, 15, 30, 60, 120, 240)
+
+"""
+    extract_sparse_measurements(sol; glucose_noise, insulin_noise, rng)
+        -> (glucose::Vector, insulin::Vector)
+
+Subsample the dense simulation at the OGTT schedule and add measurement noise.
+Used to train the gating network on raw sparse measurements (the way the model
+will see real-life patient data) instead of derived features.
+"""
+function extract_sparse_measurements(sol;
+        glucose_noise=0.05, insulin_noise=0.15,
+        rng=Random.default_rng())
+    t       = sol.t
+    glucose = sol[2, :]
+    insulin = sol[4, :]
+
+    # noise applied independently from extract_features so the two signals
+    # remain consistent when we save both for the same patient.
+    glucose = glucose .+ glucose .* glucose_noise .* randn(rng, length(glucose))
+    insulin = insulin .+ insulin .* insulin_noise .* randn(rng, length(insulin))
+    glucose = max.(glucose, 0.5)
+    insulin = max.(insulin, 0.0)
+
+    at(signal, minute) = signal[clamp(round(Int, minute) + 1, 1, length(signal))]
+
+    g = Float64[at(glucose, m) for m in GLUCOSE_TIMES]
+    i = Float64[at(insulin, m) for m in INSULIN_TIMES]
+    return g, i
+end
+
 """
     extract_features(sol; glucose_noise, insulin_noise, rng) -> Vector{Float64}
 
@@ -189,6 +223,8 @@ function generate_cohort(n_per_type::Int; seed=42)
     label_map = Dict(:healthy => 1, :igt => 2, :t2d => 3)
 
     all_features = Vector{Vector{Float64}}()
+    all_glucose  = Vector{Vector{Float64}}()
+    all_insulin  = Vector{Vector{Float64}}()
     all_labels   = Vector{Int}()
 
     for ptype in types
@@ -205,12 +241,16 @@ function generate_cohort(n_per_type::Int; seed=42)
                     continue
                 end
 
-                feats = extract_features(sol; rng=rng)
-                if any(isnan, feats) || any(isinf, feats)
+                feats        = extract_features(sol; rng=rng)
+                g_sparse, i_sparse = extract_sparse_measurements(sol; rng=rng)
+                if any(isnan, feats) || any(isinf, feats) ||
+                   any(isnan, g_sparse) || any(isnan, i_sparse)
                     continue
                 end
 
                 push!(all_features, feats)
+                push!(all_glucose,  g_sparse)
+                push!(all_insulin,  i_sparse)
                 push!(all_labels, label_map[ptype])
                 generated += 1
             catch e
@@ -221,20 +261,37 @@ function generate_cohort(n_per_type::Int; seed=42)
         @info "$ptype: generated $generated / $n_per_type"
     end
 
-    features = reduce(hcat, all_features)'   # n_patients × n_features
-    return Matrix(features), all_labels
+    features = Matrix(reduce(hcat, all_features)')
+    glucose  = Matrix(reduce(hcat, all_glucose)')
+    insulin  = Matrix(reduce(hcat, all_insulin)')
+    return features, glucose, insulin, all_labels
 end
 
 # ─── CSV I/O ─────────────────────────────────────────────────────────────────
 
-"""Write features matrix and labels vector to CSV files in `output_dir`."""
-function save_data(output_dir::String, features::Matrix, labels::Vector{Int})
+"""Write features, sparse measurements, and labels to CSV files in `output_dir`."""
+function save_data(output_dir::String, features::Matrix,
+                   glucose::Matrix, insulin::Matrix, labels::Vector{Int})
     mkpath(output_dir)
 
     open(joinpath(output_dir, "features.csv"), "w") do io
         println(io, join(FEATURE_NAMES, ","))
         for i in axes(features, 1)
             println(io, join(features[i, :], ","))
+        end
+    end
+
+    open(joinpath(output_dir, "sparse_glucose.csv"), "w") do io
+        println(io, join(["g_$(t)" for t in GLUCOSE_TIMES], ","))
+        for i in axes(glucose, 1)
+            println(io, join(glucose[i, :], ","))
+        end
+    end
+
+    open(joinpath(output_dir, "sparse_insulin.csv"), "w") do io
+        println(io, join(["i_$(t)" for t in INSULIN_TIMES], ","))
+        for i in axes(insulin, 1)
+            println(io, join(insulin[i, :], ","))
         end
     end
 
@@ -271,9 +328,9 @@ end
 function main(; n_per_type=100, seed=42)
     output_dir = joinpath(@__DIR__, "data")
     @info "Generating mock EDES patient data" n_per_type seed
-    features, labels = generate_cohort(n_per_type; seed=seed)
-    save_data(output_dir, features, labels)
-    return features, labels
+    features, glucose, insulin, labels = generate_cohort(n_per_type; seed=seed)
+    save_data(output_dir, features, glucose, insulin, labels)
+    return features, glucose, insulin, labels
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
