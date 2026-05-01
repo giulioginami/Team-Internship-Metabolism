@@ -22,7 +22,7 @@ rng(42); % reproducibility
 %% ========================================================================
 % Settings
 % =========================================================================
-N        = 100;           % number of virtual individuals to attempt
+N        = 5000;           % number of virtual individuals to attempt
 time     = (0:1:480)';     % simulation time vector [min]
 meal_G   = 75000;          % 75g OGTT in mg
 
@@ -185,10 +185,12 @@ for i = 1:N
         continue
     end
 
-    % 4) Reject oscillating responses (too many direction changes)
-    n_crossings_G = sum(diff(sign(diff(G_sim))) ~= 0);
-    n_crossings_I = sum(diff(sign(diff(I_sim))) ~= 0);
-    if n_crossings_G > 3 || n_crossings_I > 3
+    % 4) Reject oscillating responses (multiple significant peaks)
+    G_mid = G_sim(2:end-1);
+    I_mid = I_sim(2:end-1);
+    G_peaks = G_mid(G_mid > G_sim(1:end-2) & G_mid > G_sim(3:end));
+    I_peaks = I_mid(I_mid > I_sim(1:end-2) & I_mid > I_sim(3:end));
+    if sum(G_peaks > G_b + 1.0) > 1 || sum(I_peaks > I_PL_b + 10.0) > 1
         continue
     end
 

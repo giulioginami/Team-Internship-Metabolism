@@ -136,6 +136,7 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
             med_val = median(ds.insulin_noisy, 1);
             q1 = prctile(ds.insulin_noisy, 25, 1);
             q3 = prctile(ds.insulin_noisy, 75, 1);
+            ylab    = 'Insulin (mU/L)';
             ylimts = [0 250];
         end
         
