@@ -61,9 +61,10 @@ function [ngtGroup, predmGroup, t2dmGroup, exGroup] = Classify_Diabetes_2H_OGTT(
     G_2h = inputGlucose(:, 5);
     G_max = max(inputGlucose, [], 2);
     G_min = min(inputGlucose, [], 2);                       % for clamping boundaries
-    ADA_T2DM = (G_0 >=7.0  |  G_2h >= 11.1)                 &  G_max < 25.0; %bump up for now %16.7; % hyperglycemia 
+    ADA_T2DM = (G_0 >=7.0  &  G_2h >= 11.1)                 &  G_max < 25.0; %bump up for now %16.7; % hyperglycemia 
     ADA_PREDM= (G_0 < 7.0) & (G_2h >= 7.8 & G_2h < 11.1)    &  G_min > 2.0;  %bump down for now %3.9 ; % hypoglycemia 2~3  peak -> lower through T2 stage update through time  
     ADA_NGT  = (G_0 < 7.0) & (G_2h < 7.8)                   &  G_min > 3.9; 
+
     
     % QUICKI = Calculate_QUICKI(inputGlucose(:, 1), inputInsulin(:, 1))
     % QUICKI_RESISTANT = QUICKI < 0.33             &  QUICKI>0.2%0.30; % glucose intolerance
@@ -79,6 +80,23 @@ function [ngtGroup, predmGroup, t2dmGroup, exGroup] = Classify_Diabetes_2H_OGTT(
     NGT_set = ADA_NGT;       % & in_distribution & QUICKI_HEALTHY & Matsuda_HEALTHY;
     % resistant_NGT = ADA_NGT & in_distribution & (QUICKI_RESISTANT | Matsuda_RESISTANT);
     PREDM_set = ADA_PREDM;   % resistant_NGT | ADA_PREDM & in_distribution & (QUICKI_RESISTANT | Matsuda_RESISTANT);
+
+    % Additional filters to fix the curves
+    % 1) Remove NGT individuals whose peak glucose exceeds 11.0 mmol/L
+    NGT_set = NGT_set & (G_max <= 10.0);
+
+    % 2) Remove T2DM individuals whose glucose peak occurs before 90 min
+    %    OGTT columns: [t=0, t=30, t=60, t=90, t=120] -> index 4 = 90 min
+    % [~, peak_idx] = max(inputGlucose, [], 2);
+    % T2DM_set = T2DM_set & (peak_idx > 4);
+
+    % 3) Remove T2DM individuals with insulin concentration beyond 300 mU/L
+    % I_max = max(inputInsulin, [], 2);
+    % T2DM_set = T2DM_set & (I_max <= 300);
+
+    % 4) Remove T2DM individuals with peak glucose below 15 mmol/L (raises median)
+    % T2DM_set = T2DM_set & (G_max >= 15.0);
+
     out_distribution_set = ~(T2DM_set | NGT_set | PREDM_set);
    
     ngtGroup = NGT_set;

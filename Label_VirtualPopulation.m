@@ -37,8 +37,8 @@ idx_30 = find(time == 30, 1);
 idx_60 = find(time == 60, 1);
 idx_90 = find(time == 90, 1);
 idx_120 = find(time == 120, 1);
-ogtt_test_glucose = glucose_clean(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
-ogtt_test_insulin = insulin_clean(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
+ogtt_test_glucose = glucose_noisy(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
+ogtt_test_insulin = insulin_noisy(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
 G_fasting = glucose_noisy(:, idx_fast);   % [n_valid x 1]
 G_2h      = glucose_noisy(:, idx_120);    % [n_valid x 1]
 % Apply ADA rules
@@ -155,7 +155,7 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
         
         xlabel(ax, 'Time (min)'); ylabel(ylab);
         title(ax, sprintf('%s  (n=%d)', cat, n_avail));
-        xlim(ax, [0 480]);%xlim(ax, [0 180]); 
+        xlim(ax, [0 300]);%xlim(ax, [0 180]); 
         %ylim(ax, ylimits);
         grid(ax,'on');
         hold(ax, 'off');
