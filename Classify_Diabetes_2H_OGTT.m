@@ -94,8 +94,8 @@ function [ngtGroup, predmGroup, t2dmGroup, exGroup] = Classify_Diabetes_2H_OGTT(
     % I_max = max(inputInsulin, [], 2);
     % T2DM_set = T2DM_set & (I_max <= 300);
 
-    % 4) Remove T2DM individuals with peak glucose below 15 mmol/L (raises median)
-    % T2DM_set = T2DM_set & (G_max >= 15.0);
+    % 4) Remove T2DM individuals with fasting glucose below 11 mmol/L
+     T2DM_set = T2DM_set & (G_0 < 11.0);
 
     out_distribution_set = ~(T2DM_set | NGT_set | PREDM_set);
    

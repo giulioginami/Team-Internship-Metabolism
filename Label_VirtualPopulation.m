@@ -109,6 +109,12 @@ colors = struct('NGT',  [0.18 0.63 0.18], ...   % green
                 'IGT',  [0.93 0.69 0.13], ...   % amber
                 'T2DM', [0.80 0.15 0.15]);       % red
 
+% Shared y-axis limits across all populations (99th percentile to avoid outliers)
+all_G = [dataset_NGT.glucose_noisy; dataset_IGT.glucose_noisy; dataset_T2DM.glucose_noisy];
+all_I = [dataset_NGT.insulin_noisy; dataset_IGT.insulin_noisy; dataset_T2DM.insulin_noisy];
+ylim_G = [0, prctile(all_G(:), 99) * 1.1];
+ylim_I = [0, prctile(all_I(:), 99) * 1.1];
+
 figure('Name','Virtual Population - ADA Categories','Position',[80 80 1400 550]);
 
 categories = {'NGT','IGT','T2DM'};
@@ -125,19 +131,19 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
         n_draw  = min(n_show, n_avail);
         idx     = randperm(n_avail, n_draw);
         if col == 1
-            traces  = ds.glucose_noisy;
-            med_val = median(ds.glucose_noisy, 1);
-            q1 = prctile(ds.glucose_noisy, 25, 1);
-            q3 = prctile(ds.glucose_noisy, 75, 1);
-            ylab    = 'Glucose (mmol/L)';
-            ylimits = [0 20];
+            traces   = ds.glucose_noisy;
+            med_val  = median(ds.glucose_noisy, 1);
+            q1       = prctile(ds.glucose_noisy, 25, 1);
+            q3       = prctile(ds.glucose_noisy, 75, 1);
+            ylab     = 'Glucose (mmol/L)';
+            ylim_cur = ylim_G;
         else
-            traces  = ds.insulin_noisy;
-            med_val = median(ds.insulin_noisy, 1);
-            q1 = prctile(ds.insulin_noisy, 25, 1);
-            q3 = prctile(ds.insulin_noisy, 75, 1);
-            ylab    = 'Insulin (mU/L)';
-            ylimts = [0 250];
+            traces   = ds.insulin_noisy;
+            med_val  = median(ds.insulin_noisy, 1);
+            q1       = prctile(ds.insulin_noisy, 25, 1);
+            q3       = prctile(ds.insulin_noisy, 75, 1);
+            ylab     = 'Insulin (mU/L)';
+            ylim_cur = ylim_I;
         end
         
         % plot sampled traces
@@ -155,8 +161,8 @@ for col = 1:2   % col 1 = glucose, col 2 = insulin
         
         xlabel(ax, 'Time (min)'); ylabel(ylab);
         title(ax, sprintf('%s  (n=%d)', cat, n_avail));
-        xlim(ax, [0 300]);%xlim(ax, [0 180]); 
-        %ylim(ax, ylimits);
+        xlim(ax, [0 300]);
+        ylim(ax, ylim_cur);
         grid(ax,'on');
         hold(ax, 'off');
 
