@@ -40,23 +40,6 @@ idx_120 = find(time == 120, 1);
 ogtt_test_glucose = glucose_noisy(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
 ogtt_test_insulin = insulin_noisy(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
 G_fasting = glucose_noisy(:, idx_fast);   % [n_valid x 1]
-G_2h      = glucose_noisy(:, idx_120);    % [n_valid x 1]
-% Apply ADA rules
-[is_NGT, is_IGT, is_T2DM, err] = Classify_Diabetes_2H_OGTT(ogtt_test_glucose, ogtt_test_insulin);
-
-
-%% ========================================================================
-% Extract diagnostic glucose values
-% =========================================================================
-% Fasting = first time point (t = 0 min)
-idx_fast = find(time == 0, 1);
-idx_30 = find(time == 30, 1);
-idx_60 = find(time == 60, 1);
-idx_90 = find(time == 90, 1);
-idx_120 = find(time == 120, 1);
-ogtt_test_glucose = glucose_clean(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
-ogtt_test_insulin = insulin_clean(:, [idx_fast, idx_30, idx_60, idx_90, idx_120]);
-G_fasting = glucose_noisy(:, idx_fast);   % [n_valid x 1]
 I_fasting = insulin_noisy(:, idx_fast);
 G_2h      = glucose_noisy(:, idx_120);    % [n_valid x 1]
 % Apply ADA rules
