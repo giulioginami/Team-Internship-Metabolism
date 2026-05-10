@@ -23,7 +23,7 @@ load('virtual_population_labelled.mat', ...
 %% ========================================================================
 % Define sparse time points and locate column indices
 % =========================================================================
-t_sparse    = [0, 30, 60, 90, 120, 150, 180, 210, 240, 360, 480];   % minutes
+t_sparse    = [0, 30, 60, 90, 120];   % minutes try [0, 15, 30, 45, 60, 90, 120], use standard OGTT [0 30 60 90 120]
 time_full   = dataset_NGT.time;               % full 0:1:480 vector
 
 sparse_idx = zeros(1, numel(t_sparse));
@@ -124,8 +124,8 @@ for col = 1:2
         xlabel('Time (min)'); ylabel(ylab);
         title(sprintf('%s : %s  (n=%d)', categories{r}, ylab, ds.n));
         set(gca, 'XTick', t_sparse);
-        xlim([-20, 500]); grid on; box on;
+        xlim([-20, 150]); grid on; box on;
     end
 end
 
-sgtitle('Sparse datasets: t = [0, 30, 60, 90, 120, 150, 180, 210, 240, 360, 480] min', 'FontSize',13);
+sgtitle('Sparse datasets: t = [0, 30, 60, 90, 120] min', 'FontSize',13);
