@@ -1,9 +1,9 @@
 %% main.m
-% Direct comparison of the MoE and single-expert approaches on one patient
+% Direct comparison of the MoE and single-PID approaches on one patient
 % from the Japan dataset.
 %
-%   1. Run MoE optimisation       [k1, k5]        (final_architecture_real.m)
-%   2. Run single-expert optimisation [k1, k5, k6] (single_expert_real.m)
+%   1. Run MoE optimisation       [k1, k5]        
+%   2. Run single-expert optimisation [k1, k5, k6] 
 %   3. Figure 1 — Predicted trajectories vs observed (both methods overlaid)
 %   4. Figure 2 — RMSE and fitted-parameter comparison
 %
@@ -33,7 +33,7 @@ global t_saved G_PL_saved
 %% -------------------------------------------------------------------------
 %% Settings
 %% -------------------------------------------------------------------------
-PATIENT_IDX  = 60;   % 1 to 118
+PATIENT_IDX  = 35;   % 1 to 118
 num_par_sets = 5;     % LHS starts for single-expert
 
 col_moe = [0.13, 0.47, 0.71];   % blue  — MoE
@@ -278,14 +278,14 @@ b2(1).FaceColor = col_moe;
 b2(2).FaceColor = col_se;
 set(gca, 'XTickLabel', {'k_1  (min^{-1})', 'k_5  (min^{-1})'});
 ylabel('Parameter value');
-title(sprintf('Fitted parameters\n(k_6 optimised by SE only: k_6 = %.4f)', best_p_opt_se(3)));
+%title(sprintf('Fitted parameters\n(k_6 optimised by SE only: k_6 = %.4f)', best_p_opt_se(3)));
 legend({'MoE', 'Single-expert'}, 'Location', 'best');
 grid on;
 
 sgtitle(sprintf('Performance comparison  |  Patient %d  (%s)', PATIENT_IDX, POPULATION));
 
 %% =========================================================================
-%% Local functions  (identical to final_architecture_real.m)
+%% Local functions 
 %% =========================================================================
 
 function res = weighted_residuals(k, w, pids, fixed, G_b, I_PL_b, BW, meal_G, ...
