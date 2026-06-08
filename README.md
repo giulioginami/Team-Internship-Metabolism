@@ -485,10 +485,7 @@ insulin secretion capacity.
   t_saved    = 0;
   G_PL_saved = G_b;
   ```
-- **HDF5 transpose**: MATLAB saves v7.3 arrays in column-major order. When loading with
-  h5py in Python, always call `.T` on the result to get row-major `[n × m]` arrays.
-- **float32 vs double**: gating weights exported from PyTorch are float32. In MATLAB,
-  always cast the gating output: `w = double(e_z / sum(e_z))` before passing to `lsqnonlin`.
+
 - **param_matrix columns**: `[k1, k5, k6, k8, G_b, I_PL_b, BW]` — column order is
   consistent across all scripts.
 - **AUC regularisation constraint**: `EDES_ErrorFunc` accesses `X(1:240,1)` from the ODE
@@ -501,3 +498,11 @@ insulin secretion capacity.
 - **Path setup**: `startup.m` (root) adds all subfolders to the MATLAB path automatically.
   Run it once (or place it in the MATLAB startup directory) so that scripts in any
   subfolder can call functions from `EDES_PID/` and `EDES_MoE/` without manual `addpath`.
+- **EDES model**: (https://pubmed.ncbi.nlm.nih.gov/25526760/) (Maas et al., 2015)
+
+
+## Team
+
+Built as part of the team internship at [Eindhoven University of Technology](https://www.tue.nl/), Department of Biomedical Engineering.
+
+
