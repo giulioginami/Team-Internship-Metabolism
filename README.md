@@ -1,17 +1,17 @@
-# MoE-EDES: Mixture-of-Experts Personalised Diabetes Parameter Estimation
+# MoE-EDES: Mixture-of-Experts Personalized Parameter Estimation
 
 ## Overview
 
-This project implements a complete end-to-end pipeline for personalised diabetes parameter
+This project implements a complete end-to-end pipeline for personalized parameter
 estimation using the EDES (Eindhoven Diabetes Education Simulator) physiological model.
 A Mixture-of-Experts (MoE) framework blends three population-specific EDES experts,
 guided by a neural gating network trained on sparse OGTT observations.
 
-The fitted parameters — primarily **k1** (gastric emptying rate) and **k5** (insulin-dependent
+The fitted parameters — **k1** (gastric emptying rate) and **k5** (insulin-dependent
 glucose uptake rate) — allow the EDES model to replicate an individual patient's
 postprandial glucose and insulin dynamics from a standard 75 g 5-point OGTT.
 
-The MoE approach is compared against a **single-expert baseline**, and both are evaluated on a real-world dataset of 118 Japanese patients with OGTT measurements and a gold-standard GIR from euglycemic hyperinsulinaemic clamp.
+The MoE approach is compared against a **single-expert baseline**, and both are evaluated on a real-world dataset of 118 individuals with OGTT measurements and a gold-standard measures.
 
 ---
 
@@ -29,11 +29,11 @@ a small number of root-level files.
 EDES_MoE/
   Datasets/
     Real Dataset/
-      japan_population_labelled.mat   118 real patients: glucose, insulin, BW, GIR (external)
+      japan_population_labelled.mat   118 real patients: glucose, insulin, BW, GIR, incr_AUC_IRI 
 
     Virtual Dataset/
-      Generate_VirtualPopulation.m    Generate N=5000 virtual patients via LHS + EDES ODE
-      Label_VirtualPopulation.m       Classify patients by ADA 2026 criteria (NGT/IGT/T2DM)
+      Generate_VirtualPopulation.m    Generate N=5000 virtual individuals via LHS + EDES ODE
+      Label_VirtualPopulation.m       Classify individuals by ADA 2026 criteria (NGT/IGT/T2DM)
       Classify_Diabetes_2H_OGTT.m     ADA classification logic (helper function)
       Create_SparseDatasets.m         Subsample to 5-point OGTT (t = 0,30,60,90,120 min)
       Calculate_Matsuda_5_OGTT.m      Compute Matsuda insulin-sensitivity index from 5-pt OGTT
@@ -46,16 +46,21 @@ EDES_MoE/
     gating_network.py                 Train neural gating network; export weights to MATLAB
     gating_network.pt                 Trained PyTorch model state dict
     gating_weights.mat                Weights exported for MATLAB inference
+    gating_network_results.png        Training curve + mean gating weights bar chart (generated output)
 
   Mixture of Experts/
-    Fit_MoE.m                         MoE fit on one real patient from the Japan dataset
-    Dataset_Fit_MoE.m                 MoE fit on all 118 Japan dataset patients (population evaluation)
-    Fit_PID.m                         Single-expert fit on one real patient
-    Dataset_Fit_PID.m                 Single-expert fit on all 118 patients (population evaluation)
+    Fit_MoE.m                         MoE fit on one real individual from the Ohashi dataset
+    Dataset_Fit_MoE.m                 MoE fit on all 118 Ohashi dataset patients (population evaluation)
+    Fit_PID.m                         Single-expert fit on one real data
+    Dataset_Fit_PID.m                 Single-expert fit on all 118 individuals (population evaluation)
+    correlation_analysis.m            Pearson/Spearman correlation of k5→GIR and k6→incr_AUC_IRI (MoE vs SE)
+    MoE_dataset_results.mat           k1_all, k5_all, cats, w_all from Dataset_Fit_MoE.m
+    single_PID_dataset_results.mat    k1_all, k5_all, k6_all, cats from Dataset_Fit_PID.m
 
   PID Optimization/
-    PID_optimization.m                Optimise expert PID parameters (k5, k6, k8) per category
+    PID_optimization.m                Optimise expert parameters (k5, k6, k8) per category
     Save_PID_Predictions.m            Pre-compute expert EDES predictions for gating network training
+    pid_predictions.mat               Expert glucose/insulin predictions [N × 3 × 5] (generated output)
 
 EDES_PID/                             Shared EDES core functions and utilities (not modified)
   EDES_ODE.m                          5-state ODE right-hand side
@@ -87,6 +92,7 @@ EDES_PID/                             Shared EDES core functions and utilities (
 | 7 | `python gating_network.py` | Python | `gating_network.pt`, `gating_weights.mat` |
 | 8 | `Fit_MoE.m` | MATLAB | MoE personalised fit (one patient) |
 | 9 | `Dataset_Fit_MoE.m` | MATLAB | MoE population evaluation (118 patients) |
+| 10 | `main.m` | MATLAB | Fit comparison between MoE and single-expert |
 
 ---
 
@@ -107,7 +113,7 @@ pip install torch numpy h5py matplotlib scipy fpdf2
 
 ### `Generate_VirtualPopulation.m`
 
-Generates a virtual population of N=5000 candidate patients.
+Generates a virtual population of N=5000 candidate individuals.
 
 - **Sampling**: Latin Hypercube Sampling (LHS) over 7 parameters — k1, k5, k6, k8, G_b, I_PL_b, BW
 - **Simulation**: each candidate is run through the EDES ODE (`ode45`) for 0–480 min under a 75 g OGTT
@@ -129,7 +135,7 @@ Generates a virtual population of N=5000 candidate patients.
 
 ### `Label_VirtualPopulation.m`
 
-Classifies every virtual patient by ADA 2026 criteria applied to the 5-point OGTT
+Classifies every virtual patient by ADA criteria applied to the 5-point OGTT
 (t = 0, 30, 60, 90, 120 min). Splits the population into three dataset structs:
 `dataset_NGT`, `dataset_IGT`, `dataset_T2DM`.
 
@@ -182,10 +188,10 @@ and insulin values. Used as an auxiliary insulin-sensitivity biomarker.
 
 ### `PID_optimization.m`
 
-Optimises three sets of PID parameters (k5, k6, k8), one per population, by fitting the
+Optimises three sets of parameters (k5, k6, k8), one per ADA category, by fitting the
 EDES ODE to the population median trajectory.
 
-- **Representative patient**: uses median G_b, I_PL_b, BW, k1 across the population
+- **Representative patient**: uses median G_b, I_PL_b, BW, k1 across the ADA category
 - **Solver**: `lsqnonlin` with normalised residuals:
   ```
   res = [(G_sim - G_med) / norm(G_med);
@@ -205,7 +211,7 @@ EDES ODE to the population median trajectory.
 
 ### `Save_PID_Predictions.m`
 
-For every patient in all three populations, runs the EDES ODE **three times** (once per
+For every patient in all three ADA category, runs the EDES ODE **three times** (once per
 expert) and stores the predicted glucose and insulin at the sparse time points.
 This precomputation lets the gating network train without ODE calls in Python.
 
@@ -255,14 +261,14 @@ where `G_pred = w_NGT * G_NGT + w_IGT * G_IGT + w_T2DM * G_T2DM`.
 
 ## Section 4 — MoE Architecture
 
-### MoE Personalised Fitting — One Patient: `Fit_MoE.m`
+### MoE Personalised Fitting — One Individual: `Fit_MoE.m`
 
-Applies the full MoE pipeline to a single real patient selected from
+Applies the full MoE pipeline to a single real individual selected from
 `japan_population_labelled.mat`. Change `PATIENT_IDX` (1–118) to select a different patient.
 
 **Steps:**
 
-1. **Load patient OGTT data** — G_obs [1×5] mmol/L, I_obs [1×5] mU/L, BW (kg)
+1. **Load individual OGTT data** — G_obs [1×5] mmol/L, I_obs [1×5] mU/L, BW (kg)
 
 2. **Gating network forward pass** (pure MATLAB, no Python required):
    ```matlab
@@ -290,22 +296,22 @@ Applies the full MoE pipeline to a single real patient selected from
 
 ### MoE Population Evaluation — Full Dataset: `Dataset_Fit_MoE.m`
 
-Runs the MoE personalised fitting on all N=118 patients in `japan_population_labelled.mat`
+Runs the MoE personalised fitting on all N=118 individuals in `japan_population_labelled.mat`
 and produces three summary figures. Results are saved to `MoE_dataset_results.mat`
 (k1_all, k5_all, cats, w_all) for downstream analysis (e.g. `correlation.m`).
 
 **Figure 1 — RMSE per ADA category (boxplot + jittered points)**
 
-For each patient *i*, the MoE model predicts glucose and insulin at the five sparse time
+For each individual *i*, the MoE model predicts glucose and insulin at the five sparse time
 points using the optimised [k1, k5]. RMSE is computed as:
 ```
 G_RMSE(i) = sqrt( mean( (G_pred_sparse(i,:) - G_obs(i,:)).^2 ) )
 I_RMSE(i) = sqrt( mean( (I_pred_sparse(i,:) - I_obs(i,:)).^2 ) )
 ```
-Patients are grouped by ADA category. The distribution is shown as a boxplot with
-individual patient values overlaid as jittered coloured points.
+Individuals are grouped by ADA category. The distribution is shown as a boxplot with
+individual values overlaid as jittered coloured points.
 
-- A narrow, low box indicates the model fits most patients in that group consistently.
+- A narrow, low box indicates the model fits most individuals in that group consistently.
 - A wide or high box reveals systematic difficulty for that category.
 - Outlier points identify patients where the EDES model cannot reproduce the trajectory.
 
@@ -316,17 +322,17 @@ After optimisation, the full MoE trajectory is simulated on a dense grid (0–12
 trajectories are computed. Each subplot shows:
 - Shaded band: mean ± 1 SD of observed glucose or insulin
 - Coloured line + dots: mean observed values at the five time points
-- Black curve: mean of MoE simulated trajectories across patients
+- Black curve: mean of MoE simulated trajectories across individuals
 
 - Agreement between the black curve and the coloured line indicates the model captures
   the average population response correctly.
 - If the black curve falls inside the shaded band, the model is within one SD of the
-  population — a reasonable fit given inter-patient variability.
+  population — a reasonable fit given inter-individual variability.
 - A systematic offset reveals a structural limitation of the EDES model for that category.
 
 **Figure 3 — Mean gating weights per ADA category**
 
-For each patient, the gating network produces `[w_NGT, w_IGT, w_T2DM]` (softmax, sum=1).
+For each individual, the gating network produces `[w_NGT, w_IGT, w_T2DM]` (softmax, sum=1).
 The mean and SD of each weight within each true ADA category are shown as a grouped bar chart.
 
 - A well-calibrated network assigns the highest weight to the correct expert:
@@ -338,7 +344,7 @@ The mean and SD of each weight within each true ADA category are shown as a grou
 
 ## Section 5 — Single-Expert Baseline
 
-The single-expert approach uses `Fit_EDES_LatinHyperCube` method as a reference baseline. Unlike MoE, it fits a single EDES model per patient without any population-specific expert mixture or gating network.
+The single-expert approach uses `Fit_EDES_LatinHyperCube` method as a reference baseline. Unlike MoE, it fits a EDES model per individual without any population-specific expert mixture or gating network.
 
 **Key differences from MoE:**
 
@@ -356,9 +362,9 @@ The single-expert approach uses `Fit_EDES_LatinHyperCube` method as a reference 
 
 ---
 
-### Single-Expert Fitting — One Patient: `Fit_PID.m`
+### Single-Expert Fitting — One individual: `Fit_PID.m`
 
-Fits the single-expert EDES model to one real patient from `japan_population_labelled.mat`.
+Fits the single-expert EDES model to one real individual from `japan_population_labelled.mat`.
 Change `PATIENT_IDX` (1–118) and `num_par_sets` (number of LHS starts, default 5).
 
 **Steps:**
@@ -377,19 +383,19 @@ Console output shows resnorm per LHS start so convergence behaviour is visible.
 
 ### Single-Expert Population Evaluation — Full Dataset: `Dataset_Fit_PID.m`
 
-Runs the single-expert fitting on all N=118 Japan dataset patients and produces the same
+Runs the single-expert fitting on all N=118 Ohashi dataset individuals and produces the same
 two summary figures as `Dataset_Fit_MoE.m` (RMSE boxplots and mean ± 1 SD
 trajectories) for direct comparison. Results are saved to `single_PID_dataset_results.mat`
 (k1_all, k5_all, k6_all, cats).
 
-> **Runtime note**: with 5 LHS starts per patient, this script takes significantly longer
+> **Runtime note**: with 5 LHS starts per individual, this script takes significantly longer
 > than `Dataset_Fit_MoE.m`. 
 
 ---
 
 ## Section 6 — Direct Comparison: `main.m`
 
-Runs both the MoE and single-expert approaches on a single patient and produces
+Runs both the MoE and single-expert approaches on a single individual and produces
 side-by-side comparison figures. Useful for understanding how the two methods
 differ in fit quality, trajectory shape, and parameter values for a specific individual.
 
@@ -399,7 +405,7 @@ PATIENT_IDX   1–118: row index in japan_population_labelled.mat
 num_par_sets  number of LHS starts for single-expert (default: 5)
 ```
 
-To use for a patient not in the Japan dataset, replace the data-loading block with:
+To use for an individual not in the Ohashi dataset, replace the data-loading block with:
 ```
 G_obs      [1 x 5]  plasma glucose at t = [0 30 60 90 120] min  (mmol/L)
 I_obs      [1 x 5]  plasma insulin at t = [0 30 60 90 120] min  (mU/L)
@@ -421,6 +427,37 @@ POPULATION          'NGT', 'IGT', or 'T2DM'
 
 ---
 
+## Section 7 — Correlation Analysis: `correlation_analysis.m`
+
+Validates the physiological meaning of the fitted parameters by correlating them against
+gold-standard clinical measurements from the Ohashi dataset. Run after both
+`Dataset_Fit_MoE.m` and `Dataset_Fit_PID.m` have completed.
+
+**Prerequisites**: `MoE_dataset_results.mat`, `single_PID_dataset_results.mat`,
+`japan_population_labelled.mat`
+
+**Figure 1 — k5 vs GIR (glucose infusion rate)**
+
+Side-by-side scatter plots (MoE | single-expert). k5 is the insulin-dependent glucose
+uptake rate; GIR from a euglycemic hyperinsulinaemic clamp is the gold standard for
+insulin sensitivity. A positive correlation validates that the fitted k5 captures true
+insulin sensitivity. Both Pearson r and Spearman ρ are reported globally and broken down
+per ADA category, with a linear regression line overlaid.
+
+**Figure 2 — k6 vs incremental AUC IRI**
+
+Side-by-side scatter plots (MoE | single-expert). k6 is the proportional beta-cell gain;
+incremental AUC of insulin (first 10 min, `incr_AUC_IRI_10`) is the gold standard for
+early insulin secretion. The MoE personalised k6 is the gating-weight average of the
+three expert k6 values:
+```
+k6_personalised = w_NGT × 0.079 + w_IGT × 0.089 + w_T2DM × 0.000
+```
+A positive correlation validates that the model's beta-cell parameter tracks measured
+insulin secretion capacity.
+
+---
+
 ## Data Files Summary
 
 | File | Location | Format | Created by | Contents |
@@ -431,7 +468,8 @@ POPULATION          'NGT', 'IGT', or 'T2DM'
 | `pid_predictions.mat` | `EDES_MoE/PID Optimization/` | v7.3 | Step 5 | Expert predictions [N × 3 × 5] |
 | `gating_network.pt` | `EDES_MoE/Gating Network/` | PyTorch | Step 6 | Trained model weights |
 | `gating_weights.mat` | `EDES_MoE/Gating Network/` | v5 | Step 6 | Weights for MATLAB inference |
-| `japan_population_labelled.mat` | `EDES_MoE/Datasets/Real Dataset/` | — | External | 118 real patients: glucose, insulin, BW, GIR |
+| `gating_network_results.png` | `EDES_MoE/Gating Network/` | PNG | Step 6 | Training curve + mean gating weights bar chart |
+| `japan_population_labelled.mat` | `EDES_MoE/Datasets/Real Dataset/` | — | External | 118 real individuals: glucose, insulin, BW, GIR, incr AUC IRI |
 | `MoE_dataset_results.mat` | `EDES_MoE/Mixture of Experts/` | v5 | `Dataset_Fit_MoE.m` | k1_all, k5_all, cats, w_all (MoE) |
 | `single_PID_dataset_results.mat` | `EDES_MoE/Mixture of Experts/` | v5 | `Dataset_Fit_PID.m` | k1_all, k5_all, k6_all, cats (SE) |
 | `sample_data.mat` | `EDES_PID/` | v5 | External | Example OGTT data for standalone EDES fitting/testing |

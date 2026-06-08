@@ -159,7 +159,10 @@ for i = 1:N
 end
 fprintf('Optimisation complete.\n\n');
 
-save('EDES_MoE/Mixture of Experts/single_PID_dataset_results.mat', 'k1_all', 'k5_all', 'k6_all', 'cats');
+%save('EDES_MoE/Mixture of Experts/single_PID_dataset_results.mat', 'k1_all', 'k5_all', 'k6_all', 'cats');
+[function_folder, ~, ~] = fileparts(mfilename('fullpath'));
+save_path = fullfile(function_folder, 'single_PID_dataset_results.mat');
+save(save_path, 'k1_all', 'k5_all','k6_all', 'cats');
 fprintf('Results saved to single_PID_dataset_results.mat\n\n');
 
 %% -------------------------------------------------------------------------

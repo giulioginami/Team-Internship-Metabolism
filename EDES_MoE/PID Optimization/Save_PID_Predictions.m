@@ -109,7 +109,9 @@ end
 %% Save
 %% -------------------------------------------------------------------------
 fprintf('\nSaving pid_predictions.mat...\n');
-save('EDES_MoE/PID_Optimization/pid_predictions.mat', 'G_pids', 'I_pids', 'labels', 't_sparse', '-v7.3');
+[function_folder, ~, ~] = fileparts(mfilename('fullpath'));
+save_path = fullfile(function_folder, 'pid_predictions.mat');
+save(save_path, 'G_pids', 'I_pids', 'labels', 't_sparse', '-v7.3');
 fprintf('Done.  G_pids: [%s]  I_pids: [%s]  labels: [%s]\n', ...
         num2str(size(G_pids)), num2str(size(I_pids)), num2str(size(labels)));
 

@@ -5,10 +5,8 @@
 % virtual_population_labelled.mat.
 %
 % ADA criteria (applied to glucose_noisy):
-%   T2DM : fasting >= 7.0 mmol/L  OR  2-h >= 11.1 mmol/L
-%   or T2DM : T2DM : fasting >= 7.0 mmol/L  AND  2-h >= 11.1 mmol/L??????
+%   T2DM : fasting >= 7.0 mmol/L  AND  2-h >= 11.1 mmol/L
 %   IGT  : NOT T2DM  AND  (5.6 <= fasting <= 6.9  OR  7.8 <= 2-h <= 11.1)
-%   or IGT : NOT T2DM AND(7.8 <= 2-h <= 11.1)????
 %   NGT  : fasting < 5.6  AND  2-h < 7.8
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

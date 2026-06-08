@@ -17,7 +17,7 @@ Prerequisites — run these in MATLAB first:
   1. Generate_VirtualPopulation.m   → virtual_population.mat
   2. Label_VirtualPopulation.m      → virtual_population_labelled.mat
   3. Create_SparseDatasets.m        → virtual_population_sparse.mat
-  4. PID_optimization_full.m        → optimised k5, k6, k8 per population
+  4. PID_optimization.m             → optimised k5, k6, k8 per population
   5. Save_PID_Predictions.m         → pid_predictions.mat
      (script that runs the EDES ODE for every patient × 3 PIDs and saves
       predictions at the sparse time points)
@@ -28,12 +28,15 @@ Prerequisites — run these in MATLAB first:
        labels  [N x 1]      ground-truth class  1=NGT  2=IGT  3=T2DM
 """
 
+from pathlib import Path
 import numpy as np
 import h5py
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
+
+HERE = Path(__file__).parent
 
 
 def load_struct(f, name):
@@ -50,8 +53,8 @@ def load_struct(f, name):
 # ─────────────────────────────────────────────────────────────────────────────
 # Settings
 # ─────────────────────────────────────────────────────────────────────────────
-SPARSE_FILE  = 'virtual_population_sparse.mat'
-PRED_FILE    = 'pid_predictions.mat'
+SPARSE_FILE  = HERE / '../Datasets/Virtual Dataset/virtual_population_sparse.mat'
+PRED_FILE    = HERE / '../PID Optimization/pid_predictions.mat'
 
 HIDDEN_DIM   = 32       # neurons per hidden layer
 EPOCHS       = 300
@@ -257,13 +260,6 @@ axes[0].set_title('Training curve')
 axes[0].legend()
 axes[0].grid(True)
 
-# Weight distribution — boxplot across all patients
-# axes[1].boxplot(w_all, labels=['NGT', 'IGT', 'T2DM'])
-# axes[1].set_ylabel('Gating weight')
-# axes[1].set_title('Weight distribution (full dataset)')
-# axes[1].set_ylim([0, 1])
-# axes[1].grid(True)
-
 # Per-population mean weights — grouped bar chart
 pop_names  = ['NGT', 'IGT', 'T2DM']
 expert_names = ['w_NGT', 'w_IGT', 'w_T2DM']
@@ -272,17 +268,19 @@ x = np.arange(3)
 width = 0.25
 for j in range(3):
     means = [w_all[sl, j].mean() for sl in pop_slices.values()]
-    axes[1].bar(x + j * width, means, width, label=expert_names[j], color=colors[j], alpha=0.8)
+    stds  = [w_all[sl, j].std()  for sl in pop_slices.values()]
+    axes[1].bar(x + j * width, means, width, label=expert_names[j], color=colors[j], alpha=0.8, yerr=stds,
+              capsize=4, error_kw=dict(ecolor='black', elinewidth=1))
 axes[1].set_xticks(x + width)
-axes[1].set_xticklabels(pop_names)
+axes[1].set_xticklabels(pop_names, fontsize=14)
 axes[1].set_ylabel('Mean gating weight')
 axes[1].set_title('Mean weights per true population')
 axes[1].set_ylim([0, 1])
-axes[1].legend()
-axes[1].grid(True, axis='y')
+axes[1].legend(fontsize=14)
+axes[1].grid(False, axis='y')
 
 plt.tight_layout()
-plt.savefig('gating_network_results.png', dpi=150)
+plt.savefig(HERE / 'gating_network_results.png', dpi=150)
 plt.show()
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -292,7 +290,7 @@ torch.save({
     'model_state': model.state_dict(),
     'X_mean':      X_mean,
     'X_std':       X_std,
-}, 'gating_network.pt')
+}, HERE / 'gating_network.pt')
 print('\nModel saved to gating_network.pt')
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -301,7 +299,7 @@ print('\nModel saved to gating_network.pt')
 from scipy.io import savemat
 
 sd = model.state_dict()
-savemat('gating_weights.mat', {
+savemat(str(HERE / 'gating_weights.mat'), {
     'W1':     sd['net.0.weight'].numpy(),   # [32 x 14]
     'b1':     sd['net.0.bias'].numpy(),     # [32]
     'W2':     sd['net.2.weight'].numpy(),   # [32 x 32]

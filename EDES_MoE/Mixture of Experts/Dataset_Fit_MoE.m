@@ -128,7 +128,10 @@ for i = 1:N
 end
 fprintf('Optimisation complete.\n\n');
 
-save('EDES_MoE/Mixture of Experts/MoE_dataset_results.mat', 'k1_all', 'k5_all', 'cats', 'w_all');
+% save('EDES_MoE/Mixture of Experts/MoE_dataset_results.mat', 'k1_all', 'k5_all', 'cats', 'w_all');
+[function_folder, ~, ~] = fileparts(mfilename('fullpath'));
+save_path = fullfile(function_folder, 'MoE_dataset_results.mat');
+save(save_path, 'k1_all', 'k5_all', 'cats', 'w_all');
 fprintf('Results saved to MoE_dataset_results.mat\n\n');
 
 %% -------------------------------------------------------------------------
@@ -256,7 +259,7 @@ sgtitle('Mean +/- 1 SD: Observed vs MoE Predicted  —  Japan Dataset');
 %% =========================================================================
 %% Figure 3 — Gating weight distribution per ADA category
 %% =========================================================================
-figure('Name', 'Gating weights', 'Position', [1000 50 720 460]);
+figure('Name', 'Gating weights', 'Position', [1000 50 900 500]);
 hold on;
 x = 1:3;  bar_w = 0.25;
 expert_labels = {'w_{NGT}', 'w_{IGT}', 'w_{T2DM}'};
@@ -274,10 +277,12 @@ for e = 1:3
     errorbar(x + (e-2)*bar_w, means, errs, 'k.', 'LineWidth', 1.4, ...
         'HandleVisibility', 'off');
 end
+xlim([0.5 3.5]);
 xticks(x);  xticklabels(expert_names);
-ylabel('Mean gating weight');  ylim([0 1]);
+ax = gca; ax.FontSize = 14;
+ylabel('Mean gating weight');  ylim([0 1]); yticks(0:0.2:1);
 title('Mean gating weights per true ADA category  —  Japan Dataset');
-legend('Location', 'best');  grid on;
+legend('Location', 'best','FontSize',14);  grid on;
 
 
 %% =========================================================================

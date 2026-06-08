@@ -1,5 +1,5 @@
 %% PID_optimization_full.m
-% Optimizes k5, k6, k8 using the full EDES ODE model.
+% Optimizes k5, k6, k8 using the full EDES ODE model (Expert Calibration)
 % Fits to the median glucose and insulin trajectories of each population.
 
 clear; clc;
@@ -96,17 +96,17 @@ for p = 1:3
     subplot(2, 3, p);
     plot(time, r.G_med, '--', 'Color', clr,      'LineWidth', 1.5); hold on;
     plot(time, r.G_sim, '-',  'Color', clr * 0.6, 'LineWidth', 2);
-    xlabel('Time (min)'); ylabel('Glucose (mmol/L)');
-    title(sprintf('%s  |  k5=%.3f  k6=%.3f  k8=%.3f', pop, r.k_opt(1), r.k_opt(2), r.k_opt(3)));
-    legend('Median data', 'Optimized', 'Location', 'best');
+    xlabel('Time (min)','FontSize',18); ylabel('Glucose (mmol/L)','FontSize',18);
+    title(sprintf('%s - Glucose', pop), 'FontSize',18);
+    legend('Median data', 'Optimized', 'Location', 'northeast','FontSize', 18);
     ylim(ylim_G); grid on;
 
     subplot(2, 3, p + 3);
     plot(time, r.I_med, '--', 'Color', clr,      'LineWidth', 1.5); hold on;
     plot(time, r.I_sim, '-',  'Color', clr * 0.6, 'LineWidth', 2);
-    xlabel('Time (min)'); ylabel('Insulin (mU/L)');
-    title(sprintf('%s - Insulin', pop));
-    legend('Median data', 'Optimized', 'Location', 'best');
+    xlabel('Time (min)','FontSize',18); ylabel('Insulin (mU/L)','FontSize',18);
+    title(sprintf('%s - Insulin', pop), 'FontSize',18);
+    legend('Median data', 'Optimized', 'Location', 'northeast','FontSize', 18);
     ylim(ylim_I); grid on;
 end
 

@@ -1,6 +1,6 @@
 %% main.m
-% Direct comparison of the MoE and single-PID approaches on one patient
-% from the Japan dataset.
+% Direct comparison of the MoE and personalized-PID approaches on one patient
+% from the Ohashi dataset.
 %
 %   1. Run MoE optimisation       [k1, k5]        
 %   2. Run single-expert optimisation [k1, k5, k6] 
@@ -17,9 +17,9 @@ global t_saved G_PL_saved
 %% -------------------------------------------------------------------------
 %% Input
 %% -------------------------------------------------------------------------
-% To run for a different Japan-dataset patient, change PATIENT_IDX (1–118).
+% To run for a different Ohashi-dataset patient, change PATIENT_IDX (1–118).
 %
-% To run for a generic patient not in the Japan dataset, replace the
+% To run for a generic patient not in the Ohashi dataset, replace the
 % data-loading block below with:
 %
 %   G_obs      [1 x 5]  plasma glucose at t = [0 30 60 90 120] min  (mmol/L)
@@ -33,7 +33,7 @@ global t_saved G_PL_saved
 %% -------------------------------------------------------------------------
 %% Settings
 %% -------------------------------------------------------------------------
-PATIENT_IDX  = 35;   % 1 to 118
+PATIENT_IDX  = 4;   % 1 to 118
 num_par_sets = 5;     % LHS starts for single-expert
 
 col_moe = [0.13, 0.47, 0.71];   % blue  — MoE
@@ -63,13 +63,13 @@ end
 fprintf('Patient %d  |  ADA category: %s  |  G_b=%.2f  I_PL_b=%.2f  BW=%.1f\n', ...
     PATIENT_IDX, POPULATION, G_b, I_PL_b, BW);
 
-% Common simulation grid (matches final_architecture_real.m)
+% Common simulation grid
 time_full  = (0:1:240)';
 sparse_idx = arrayfun(@(t) find(time_full == t, 1), t_sparse);
 meal_G     = 75000;
 
 %% =========================================================================
-%% APPROACH 1 — MoE  (final_architecture_real.m)
+%% APPROACH 1 — MoE  
 %% =========================================================================
 fprintf('\n=== Approach 1: MoE ===\n');
 
@@ -130,7 +130,7 @@ G_moe = (w(1)*G_experts(1,:) + w(2)*G_experts(2,:) + w(3)*G_experts(3,:))';  % [
 I_moe = (w(1)*I_experts(1,:) + w(2)*I_experts(2,:) + w(3)*I_experts(3,:))';  % [241 x 1]
 
 %% =========================================================================
-%% APPROACH 2 — Single-expert  (single_expert_real.m)
+%% APPROACH 2 — Single-expert  
 %% =========================================================================
 fprintf('\n=== Approach 2: Single-expert ===\n');
 
